@@ -45,7 +45,7 @@ function applyWeatherStyles(code, timeOfDay) {
 function fetchWeatherData() {
     app.style.opacity = '0';
 
-    fetch(`https://api.weatherapi.com/v1/current.json?key=3477bdf0ee5b41a4b4f125649231112&q=${cityInput}`)
+    fetch(`/api/weather?city=${encodeURIComponent(cityInput)}`)
         .then((response) => response.json())
         .then((data) => {
             temp.innerHTML = `${data.current.temp_c}&#176;`;
