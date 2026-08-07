@@ -42,23 +42,23 @@ function requestWeather(city, res) {
   const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city)}`;
 
   https.get(url, (apiRes) => {
-    if (apiRes.statusCode !== 200) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: `Weather API returned status ${apiRes.statusCode}` }));
-      return;
-    }
-
     let body = '';
     apiRes.on('data', (chunk) => {
       body += chunk;
     });
     apiRes.on('end', () => {
+      if (apiRes.statusCode !== 200) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: `Weather API error: ${body || apiRes.statusCode}` }));
+        return;
+      }
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(body);
     });
-  }).on('error', () => {
+  }).on('error', (error) => {
     res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Weather request failed' }));
+    res.end(JSON.stringify({ error: `Weather request failed: ${error.message}` }));
   });
 }
 
