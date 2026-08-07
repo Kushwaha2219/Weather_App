@@ -45,11 +45,16 @@ function applyWeatherStyles(code, timeOfDay) {
 function fetchWeatherData() {
     app.style.opacity = '0';
 
-    fetch(`/api/weather?city=${encodeURIComponent(cityInput)}`)
+    const apiUrl = new URL('api/weather', window.location.href);
+    apiUrl.searchParams.set('city', cityInput);
+
+    fetch(apiUrl)
         .then((response) => {
             if (!response.ok) {
                 return response.json().then((errorData) => {
                     throw new Error(errorData.error || 'Request failed');
+                }).catch(() => {
+                    throw new Error('Weather request failed');
                 });
             }
             return response.json();
