@@ -4,8 +4,38 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
+const HOST = process.env.HOST || '0.0.0.0';
 const ROOT = __dirname;
+
+function loadEnvFile() {
+  const envPath = path.join(ROOT, '.env');
+  if (!fs.existsSync(envPath)) {
+    return;
+  }
+
+  const lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) {
+      return;
+    }
+
+    const separatorIndex = trimmed.indexOf('=');
+    if (separatorIndex === -1) {
+      return;
+    }
+
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const value = trimmed.slice(separatorIndex + 1).trim().replace(/^['"]|['"]$/g, '');
+
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
+  });
+}
+
+loadEnvFile();
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 
 const mimeTypes = {
   '.html': 'text/html',
@@ -83,6 +113,6 @@ const server = http.createServer((req, res) => {
   serveFile(res, filePath);
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`Server running at http://${HOST}:${PORT}`);
 });
