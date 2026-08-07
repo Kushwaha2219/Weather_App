@@ -46,7 +46,14 @@ function fetchWeatherData() {
     app.style.opacity = '0';
 
     fetch(`/api/weather?city=${encodeURIComponent(cityInput)}`)
-        .then((response) => response.json())
+        .then((response) => {
+            if (!response.ok) {
+                return response.json().then((errorData) => {
+                    throw new Error(errorData.error || 'Request failed');
+                });
+            }
+            return response.json();
+        })
         .then((data) => {
             temp.innerHTML = `${data.current.temp_c}&#176;`;
             conditionOutput.innerHTML = data.current.condition.text;
@@ -72,8 +79,9 @@ function fetchWeatherData() {
             applyWeatherStyles(data.current.condition.code, timeOfDay);
             app.style.opacity = '1';
         })
-        .catch(() => {
-            alert('City not found, please try again.');
+        .catch((error) => {
+            console.error(error);
+            alert(`Weather request failed: ${error.message}`);
             app.style.opacity = '1';
         });
 }
